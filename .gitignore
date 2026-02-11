@@ -187,3 +187,4 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 data/
+test.ipynb
