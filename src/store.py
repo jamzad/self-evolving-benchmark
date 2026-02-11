@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS runs (
   run_id TEXT PRIMARY KEY,
   run_at TEXT NOT NULL,
   base_url TEXT NOT NULL,
-  model TEXT NOT NULL,
-  temperature REAL NOT NULL,
+  solve_model TEXT NOT NULL,
+  judge_model TEXT NOT NULL,
   n_questions INTEGER NOT NULL
 );
 
