@@ -11,17 +11,17 @@ Grade the answer to the question using this rubric (partial credit allowed):
 - clarity (0..1)
 
 Return ONLY valid JSON exactly in this schema:
-{
+{{
   "score": 0.0,
   "pass": false,
   "reasons": ["..."],
-  "rubric_breakdown": {
+  "rubric_breakdown": {{
     "correctness": 0.0,
     "completeness": 0.0,
     "clarity": 0.0
-  },
+  }},
   "confidence": 0.0
-}
+}}
 
 Rules:
 - Use intermediate values (e.g., 0.2, 0.7) when partially correct.
@@ -39,17 +39,17 @@ FIX_JSON_TEMPLATE = """
 The following text was intended to be valid JSON, but it is invalid.
 Fix it so it becomes valid JSON matching this schema exactly:
 
-{
+{{
   "score": 0.0,
   "pass": false,
   "reasons": ["..."],
-  "rubric_breakdown": {
+  "rubric_breakdown": {{
     "correctness": 0.0,
     "completeness": 0.0,
     "clarity": 0.0
-  },
+  }},
   "confidence": 0.0
-}
+}}
 
 Rules:
 - Output JSON ONLY.
