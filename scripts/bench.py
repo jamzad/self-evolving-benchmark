@@ -11,6 +11,7 @@ from src.run import run_benchmark
 from src.report import report as make_report
 from src.export_regression import export_regression
 from src.evolve import category_means, format_weights
+from src.analyze import analyze as make_analyze
 
 
 def main():
@@ -48,6 +49,16 @@ def main():
     p_exp = sub.add_parser("export-regression", help="Export worst-K questions to JSONL")
     p_exp.add_argument("--k", type=int, default=20)
     p_exp.add_argument("--out", default="data/regression.jsonl")
+
+    sub.add_parser("analyze", help="Analyze run history, failures, and uncertainty proxy")
+
+    p_iter = sub.add_parser("iterate", help="Run multiple generate+run iterations and summarize.")
+    p_iter.add_argument("--iterations", type=int, default=5, help="Number of evolve iterations.")
+    p_iter.add_argument("--n-gen", type=int, default=5, help="Questions to generate per iteration.")
+    p_iter.add_argument("--n-run", type=int, default=5, help="Questions to evaluate per iteration.")
+    p_iter.add_argument("--alpha", type=float, default=0.2, help="EMA smoothing factor.")
+    p_iter.add_argument("--domain", type=str, default="general", help="Domain hint for generation.")
+    p_iter.add_argument("--out", type=str, default="", help="Optional CSV path to write run history (e.g., runs.csv).")
 
     args = parser.parse_args()
 
@@ -108,10 +119,88 @@ def main():
         print(make_report(con))
         return
 
+    if args.cmd == "iterate":
+        iters = int(args.iterations)
+        if iters <= 0:
+            raise SystemExit("--iterations must be >= 1")
+
+        ema_series = []
+        run_ids = []
+
+        for i in range(1, iters + 1):
+            means = category_means(con)
+            print(f"[{i}/{iters}] Evolve weights:", format_weights(means))
+
+            items = generate_questions(
+                client, caps, con,
+                model=gen_model,
+                n=args.n_gen,
+                domain=args.domain
+            )
+            print(f"[{i}/{iters}] Inserted {len(items)} novel questions.")
+
+            out = run_benchmark(
+                client, caps, con,
+                base_url=args.base_url,
+                solve_model=solve_model,
+                judge_model=judge_model,
+                n=args.n_run,
+                alpha=args.alpha
+            )
+
+            ema_series.append(float(out["ema"]))
+            run_ids.append(out["run_id"])
+
+            print(
+                f"[{i}/{iters}] Run {out['run_id']}: "
+                f"mean={out['batch_mean']:.3f} | EMA={out['ema']:.3f} | n={out['n']}"
+            )
+            print("")
+
+        # Final summaries
+        print("Final report:")
+        print(make_report(con))
+        print("")
+        print("Final analysis:")
+        print(make_analyze(con))
+        print("")
+        print("EMA series:", ema_series)
+
+        # Optional: write runs.csv
+        if getattr(args, "out", ""):
+            try:
+                import csv
+                rows = con.execute("""
+                    SELECT run_at, n_questions, batch_mean, ema_after, target_difficulty, base_url, solve_model, judge_model, run_id
+                    FROM runs
+                    ORDER BY run_at ASC
+                """).fetchall()
+
+                with open(args.out, "w", newline="", encoding="utf-8") as f:
+                    w = csv.writer(f)
+                    w.writerow(["run_at", "n_questions", "batch_mean", "ema", "target_difficulty",
+                                "base_url", "solve_model", "judge_model", "run_id"])
+                    for r in rows:
+                        w.writerow([
+                            r["run_at"], r["n_questions"], f"{r['batch_mean']:.6f}", f"{r['ema_after']:.6f}",
+                            r["target_difficulty"], r["base_url"], r["solve_model"], r["judge_model"], r["run_id"]
+                        ])
+
+                print(f"Wrote run history CSV to: {args.out}")
+            except Exception as e:
+                print(f"Warning: could not write CSV to {args.out}: {e}")
+
+        return
+
     if args.cmd == "export-regression":
         n = export_regression(con, out_path=args.out, k=args.k)
         print(f"Exported {n} questions to {args.out}")
         return
+        
+    if args.cmd == "analyze":
+        print(make_analyze(con))
+        return
+
 
 if __name__ == "__main__":
     main()

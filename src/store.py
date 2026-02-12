@@ -1,4 +1,3 @@
-# src/store.py
 import sqlite3
 from pathlib import Path
 
@@ -50,6 +49,17 @@ def connect(db_path: str) -> sqlite3.Connection:
     con.row_factory = sqlite3.Row
     return con
 
+def _add_column_if_missing(con: sqlite3.Connection, table: str, column: str, coltype: str) -> None:
+    cols = {r["name"] for r in con.execute(f"PRAGMA table_info({table})").fetchall()}
+    if column not in cols:
+        con.execute(f"ALTER TABLE {table} ADD COLUMN {column} {coltype}")
+        con.commit()
+
 def init_db(con: sqlite3.Connection) -> None:
     con.executescript(SCHEMA_SQL)
     con.commit()
+
+    # Migration-style additions (safe on existing DBs)
+    _add_column_if_missing(con, "runs", "batch_mean", "REAL")
+    _add_column_if_missing(con, "runs", "ema_after", "REAL")
+    _add_column_if_missing(con, "runs", "target_difficulty", "INTEGER")
