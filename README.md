@@ -291,49 +291,25 @@ Sampling naturally deprioritizes trivial items without destructive removal.
 
 The system operates on any OpenAI-compatible endpoint. Generation, solving, and judging are decoupled from model internals, allowing flexible deployment across model versions and providers.
 
-### Modular Separation of Concerns
-
-The system explicitly separates:
-
-- Question generation
-- Sampling
-- Evaluation
-- Metric aggregation
-- Evolution logic
-
-This modularity improves maintainability, traceability, and extensibility.
-
 
 ## Limitations
 
 - **Single-judge bias:** Evaluation relies on a single LLM judge. Although lightweight self-consistency is used (low-confidence rejudge + disagreement proxy), systematic bias in the judge model may influence scoring.
-
 - **Self-play coupling:** When generator and judge share similar model families, question difficulty may implicitly align with evaluator strengths, potentially underestimating blind spots.
-
 - **Synthetic task distribution:** Generated questions may not fully reflect real-world task distributions. The benchmark probes model behavior under synthetic stress, not empirical deployment data.
-
 - **Exact novelty enforcement:** Novelty is enforced via hash-based deduplication and prompt-level constraints. Semantic similarity filtering is not currently implemented.
-
 - **Difficulty calibration:** Difficulty levels are generator-estimated rather than psychometrically calibrated or human-validated.
-
 - **Endpoint dependence:** Observed performance and adaptive dynamics depend on the chosen solver model and API configuration.
 
 
 ## Future Extensions
 
 - **Multi-judge ensemble scoring:** Aggregate scores across heterogeneous judge models to reduce bias and improve robustness.
-
 - **Semantic novelty filtering:** Incorporate embedding-based nearest-neighbor checks to prevent semantically similar questions.
-
 - **Adversarial difficulty shaping:** Introduce explicit failure-mining or solver-aware adversarial generation loops to target blind spots more aggressively.
-
 - **Curriculum scheduling:** Formalize difficulty adjustment as a multi-objective optimization problem balancing novelty, difficulty, and uncertainty.
-
 - **Benchmark freezing for regression testing:** Support periodic snapshotting of high-signal questions into stable regression suites.
-
 - **Human-in-the-loop calibration:** Incorporate occasional human review to anchor difficulty and scoring validity.
-
 - **Domain-specialized modes:** Enable plug-in domain templates (e.g., code reasoning, math, planning, instruction-following).
-
 - **Cross-model benchmarking:** Support systematic evaluation across multiple solver models for comparative analysis.
 
