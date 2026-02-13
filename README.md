@@ -132,7 +132,7 @@ The full cycle operates as:
 Evolution Strategy → Generator → Question Bank → Adaptive Sampler → Solver → Judge → Metrics & EMA → Benchmark State → Evolution Strategy  
 
 
-## Core Concepts
+## Adaptive Mechanics
 
 ### Self-Evolution Mechanism
 
@@ -230,7 +230,7 @@ python -m scripts.bench visualize
 
 ## Results & Diagnostics
 
-Consider the following demo run:
+The following stress-run demonstrates adaptive dynamics:
 
 ```bash
 python -m scripts.bench init
