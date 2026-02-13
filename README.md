@@ -156,7 +156,9 @@ This creates a controlled exploration–exploitation balance.
 
 Instead of relying on raw batch means, performance is tracked using:
 
-EMA_t = alpha * batch_mean_t + (1 - alpha) * EMA_{t-1}
+$$
+EMA_t = \alpha \cdot batch\_mean_t + (1 - \alpha) \cdot EMA_{t-1}
+$$
 
 
 Benefits:
@@ -220,6 +222,28 @@ Analyze results:
 ```bash
 python -m scripts.bench analyze
 ```
+
+Explore results:
+
+```bash
+python -m scripts.bench visualize
+```
+
+## Results & Diagnostics
+
+Generated figures (from the persisted SQLite state):
+
+- Evolution dynamics (batch mean vs EMA vs target difficulty)  
+  ![Evolution](docs/evolution.png)
+
+- Self-evolution pressure (category weakness → generation weight)  
+  ![Category Pressure](docs/category_pressure.png)
+
+- Uncertainty proxy (judge self-consistency disagreement over time)  
+  ![Uncertainty](docs/uncertainty_over_time.png)
+
+- Category × Difficulty performance heatmap  
+  ![Heatmap](docs/category_difficulty_heatmap.png)
 
 ## Design Rationale
 
