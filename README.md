@@ -185,17 +185,15 @@ Aggregate disagreement across runs provides a lightweight proxy for evaluation u
 ## Installation
 
 ```bash
-conda create -n selfbench python=3.10
+conda create -n selfbench python=3.11
 conda activate selfbench
 pip install -r requirements.txt
 ```
 
-Create a .env file:
+Create a .env file for your API key:
 
 ```bash
 OPENAI_API_KEY=your_key_here
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=gpt-5-nano
 ```
 
 ## Quick Start
@@ -215,7 +213,7 @@ python -m scripts.bench all --n-gen 5 --n-run 5
 Iterative evolution:
 
 ```bash
-python -m scripts.bench iterate --iterations 10 --n-gen 10 --n-run 10 --alpha 0.2
+python -m scripts.bench iterate --iterations 10 --n-gen 10 --n-run 15 --alpha 0.2
 ```
 
 Analyze results:
@@ -232,24 +230,32 @@ python -m scripts.bench visualize
 
 ## Results & Diagnostics
 
-Generated figures (from the persisted SQLite state):
+Consider the following demo run:
 
-- Evolution dynamics (batch mean vs EMA vs target difficulty)  
+```bash
+python -m scripts.bench init
+python -m scripts.bench iterate --iterations 10 --n-gen 5 --n-run 5 --alpha 0.2
+python -m scripts.bench visualize
+```
+
+The generated visualizations from the persisted SQLite state are as follows:
+
+- **Benchmark evolution:** EMA smooths batch noise while target difficulty adapts over time.
 <p align="center">
   <img src="docs/evolution.png" width="500">
 </p>
 
-- Self-evolution pressure (category weakness → generation weight)  
+- **Category pressure:** weaker categories receive higher sampling/generation pressure.
 <p align="center">
   <img src="docs/category_pressure.png" width="500">
 </p>
 
-- Uncertainty proxy (judge self-consistency disagreement over time)  
+- **Judge disagreement:** lightweight uncertainty proxy (higher = more ambiguous / unstable evaluation).
 <p align="center">
   <img src="docs/uncertainty_over_time.png" width="500">
 </p>
 
-- Category × Difficulty performance heatmap  
+- **Heatmap:** identifies category×difficulty pockets where the solver degrades.
 <p align="center">
   <img src="docs/category_difficulty_heatmap.png" width="500">
 </p>
