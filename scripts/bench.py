@@ -12,6 +12,8 @@ from src.report import report as make_report
 from src.export_regression import export_regression
 from src.evolve import category_means, format_weights
 from src.analyze import analyze as make_analyze
+from src.plots import visualize_all
+
 
 
 def main():
@@ -59,6 +61,9 @@ def main():
     p_iter.add_argument("--alpha", type=float, default=0.2, help="EMA smoothing factor.")
     p_iter.add_argument("--domain", type=str, default="general", help="Domain hint for generation.")
     p_iter.add_argument("--out", type=str, default="", help="Optional CSV path to write run history (e.g., runs.csv).")
+
+    p_viz = sub.add_parser("visualize", help="Generate figures from the SQLite benchmark DB")
+    p_viz.add_argument("--out-dir", default="docs", help="Output directory for PNG figures")
 
     args = parser.parse_args()
 
@@ -200,6 +205,14 @@ def main():
     if args.cmd == "analyze":
         print(make_analyze(con))
         return
+    
+    if args.cmd == "visualize":
+        outs = visualize_all(con, out_dir=args.out_dir)
+        print("Wrote figures:")
+        for k, v in outs.items():
+            print(f"  - {k}: {v}")
+        return
+
 
 
 if __name__ == "__main__":
