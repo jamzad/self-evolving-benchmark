@@ -29,7 +29,7 @@ This design treats model evaluation as an iterative control process: apply input
 
 ## System Architecture
 
-![block_diagram](docs/block_diagram.png)
+![Block Diagram](docs/block_digram.png)
 
 The system operates as a feedback loop:
 
