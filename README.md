@@ -29,17 +29,106 @@ This design treats model evaluation as an iterative control process: apply input
 
 ## System Architecture
 
+The system is organized as a closed-loop adaptive evaluation pipeline.
+
 ![Block Diagram](docs/block_digram.png)
 
-The system operates as a feedback loop:
+### Components
 
-- Question generation expands the benchmark space.
-- Adaptive sampling selects evaluation candidates.
-- Solver and judge endpoints produce structured performance signals.
-- Metrics update a persistent state (EMA, category means, difficulty trends).
-- Evolution logic adjusts future generation priorities.
+#### Evolution Strategy
 
-This separation of concerns keeps generation, evaluation, and adaptation modular and inspectable.
+The Evolution Strategy module determines how the benchmark evolves over time.  
+It reads historical performance signals from the Benchmark State and adjusts:
+
+- Category generation weights  
+- Target difficulty  
+- Optional failure themes  
+- Sampling priorities  
+
+This component makes the system self-adaptive rather than static.
+
+#### Generator (LLM)
+
+The Generator produces new benchmark questions using an OpenAI-compatible endpoint.
+
+- Reads prior prompts from the Question Bank to enforce novelty
+- Adapts generation based on signals from Evolution Strategy
+- Inserts newly generated questions into the Question Bank
+
+
+#### Question Bank
+
+The Question Bank stores all generated benchmark questions along with metadata such as:
+
+- Category
+- Difficulty
+- Timestamp
+- Prompt text
+
+Questions are never deleted, enabling traceability and regression analysis.
+
+#### Benchmark State
+
+The Benchmark State stores dynamic evaluation information, including:
+
+- Per-question evaluation results
+- Judge scores and breakdowns
+- Confidence signals
+- Run-level batch means
+- Exponential Moving Average (EMA)
+
+Together, the Question Bank and Benchmark State form the persistent Benchmark Database.
+
+
+#### Adaptive Sampler
+
+The Adaptive Sampler selects which questions to evaluate in each run.
+
+It reads from both:
+- Question Bank
+- Benchmark State
+
+Sampling balances:
+- Exploration (unevaluated or under-evaluated questions)
+- Coverage (across categories)
+- Exploitation (focus on weaker categories)
+
+This ensures efficient use of evaluation budget while maintaining diagnostic power.
+
+#### Solver (LLM)
+
+The Solver endpoint answers sampled benchmark questions.
+
+It receives the prompt and produces a model-generated response.
+
+#### Judge (LLM)
+
+The Judge evaluates the Solver’s response conditioned on the original question.
+
+It outputs structured scoring information including:
+
+- Scalar score
+- Rubric breakdown
+- Confidence estimate
+- Optional disagreement signal
+
+#### Metrics & EMA
+
+The Metrics & EMA module aggregates judge outputs and updates:
+
+- Batch mean score
+- Exponential Moving Average (EMA)
+- Category-level performance statistics
+
+These metrics are written back to the Benchmark State and fed into the Evolution Strategy, closing the adaptive loop.
+
+
+### Closed-Loop Flow
+
+The full cycle operates as:
+
+Evolution Strategy → Generator → Question Bank → Adaptive Sampler  
+→ Solver → Judge → Metrics & EMA → Benchmark State → Evolution Strategy  
 
 
 ## Core Concepts
