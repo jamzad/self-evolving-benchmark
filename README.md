@@ -31,7 +31,9 @@ This design treats model evaluation as an iterative control process: apply input
 
 The system is organized as a closed-loop adaptive evaluation pipeline.
 
-![Block Diagram](docs/block_digram.png)
+<p align="center">
+  <img src="docs/block_digram.png" width="600">
+</p>
 
 ### Components
 
@@ -127,8 +129,7 @@ These metrics are written back to the Benchmark State and fed into the Evolution
 
 The full cycle operates as:
 
-Evolution Strategy → Generator → Question Bank → Adaptive Sampler  
-→ Solver → Judge → Metrics & EMA → Benchmark State → Evolution Strategy  
+Evolution Strategy → Generator → Question Bank → Adaptive Sampler → Solver → Judge → Metrics & EMA → Benchmark State → Evolution Strategy  
 
 
 ## Core Concepts
@@ -234,16 +235,25 @@ python -m scripts.bench visualize
 Generated figures (from the persisted SQLite state):
 
 - Evolution dynamics (batch mean vs EMA vs target difficulty)  
-  ![Evolution](docs/evolution.png)
+<p align="center">
+  <img src="docs/evolution.png" width="500">
+</p>
 
 - Self-evolution pressure (category weakness → generation weight)  
-  ![Category Pressure](docs/category_pressure.png)
+<p align="center">
+  <img src="docs/category_pressure.png" width="500">
+</p>
 
 - Uncertainty proxy (judge self-consistency disagreement over time)  
-  ![Uncertainty](docs/uncertainty_over_time.png)
+<p align="center">
+  <img src="docs/uncertainty_over_time.png" width="500">
+</p>
 
 - Category × Difficulty performance heatmap  
-  ![Heatmap](docs/category_difficulty_heatmap.png)
+<p align="center">
+  <img src="docs/category_difficulty_heatmap.png" width="500">
+</p>
+
 
 ## Design Rationale
 
